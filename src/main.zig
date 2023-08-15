@@ -2,6 +2,33 @@ const std = @import("std");
 
 const allocator = std.heap.page_allocator;
 
+fn get_page_html(path: []const u8) ![]const u8 {
+    const file = try std.fs.cwd().openFile(path, .{});
+    defer file.close();
+    const buf = try file.readToEndAlloc(std.heap.page_allocator, 1_000_000);
+    return buf;
+}
+
+fn clicked() ![]const u8 {
+    const html = try get_page_html("templates/clicked.html");
+    return html;
+}
+
+fn root() ![]const u8 {
+    const html = try get_page_html("templates/index.html");
+    return html;
+}
+
+fn router(target: []const u8) ![]const u8 {
+    if (std.mem.eql(u8, target, "/")) {
+        return root();
+    } else if (std.mem.eql(u8, target, "/clicked")) {
+        return clicked();
+    } else {
+        return "";
+    }
+}
+
 pub fn main() !void {
     var server = std.http.Server.init(allocator, .{});
     defer server.deinit();
@@ -17,9 +44,11 @@ pub fn main() !void {
 
         try response.wait();
 
-        const server_body: []const u8 = "message from server!\n";
+        std.log.info("TARGET: {s}", .{response.request.target});
+
+        const server_body = try router(response.request.target);
         response.transfer_encoding = .{ .content_length = server_body.len };
-        try response.headers.append("content-type", "text/plain");
+        try response.headers.append("content-type", "text/html");
         try response.headers.append("connection", "close");
         try response.do();
 

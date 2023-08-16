@@ -1,22 +1,20 @@
 const std = @import("std");
 
+const List = @import("./components/list.zig");
+const Root = @import("./components/root.zig");
+
 const allocator = std.heap.page_allocator;
 
-fn get_page_html(path: []const u8) ![]const u8 {
-    const file = try std.fs.cwd().openFile(path, .{});
-    defer file.close();
-    const buf = try file.readToEndAlloc(std.heap.page_allocator, 1_000_000);
-    return buf;
-}
+var list = List.init();
 
 fn clicked() ![]const u8 {
-    const html = try get_page_html("templates/clicked.html");
-    return html;
+    try list.update("/clicked");
+    return list.view();
 }
 
 fn root() ![]const u8 {
-    const html = try get_page_html("templates/index.html");
-    return html;
+    list.reset();
+    return Root.view();
 }
 
 fn router(target: []const u8) ![]const u8 {
@@ -57,4 +55,6 @@ pub fn main() !void {
     } else |err| {
         std.log.err("ERROR: {}", .{err});
     }
+
+    list.deinit();
 }

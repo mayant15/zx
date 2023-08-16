@@ -7,23 +7,21 @@ const Db = @import("./db.zig");
 
 const allocator = std.heap.page_allocator;
 
-var list = List.init();
-
-fn clicked() ![]const u8 {
+fn clicked(list: *List) ![]const u8 {
     try list.update("/clicked");
     return list.view();
 }
 
-fn root() ![]const u8 {
-    list.reset();
+fn root(list: *List) ![]const u8 {
+    _ = list;
     return Root.view();
 }
 
-fn router(target: []const u8) ![]const u8 {
+fn router(target: []const u8, list: *List) ![]const u8 {
     if (std.mem.eql(u8, target, "/")) {
-        return root();
+        return root(list);
     } else if (std.mem.eql(u8, target, "/clicked")) {
-        return clicked();
+        return clicked(list);
     } else {
         return "";
     }
@@ -38,10 +36,7 @@ pub fn main() !void {
     std.log.info("Listening on {}", .{address});
 
     var db = try Db.init();
-    const todo = try db.get_one_todo();
-    if (todo) |t| {
-        std.log.info("TODO: {s}", .{t.contents});
-    }
+    var list = List.init(&db);
 
     while (server.accept(.{ .allocator = allocator })) |res| {
         var response = res;
@@ -52,7 +47,7 @@ pub fn main() !void {
 
         std.log.info("TARGET: {s}", .{response.request.target});
 
-        const server_body = try router(response.request.target);
+        const server_body = try router(response.request.target, &list);
         response.transfer_encoding = .{ .content_length = server_body.len };
         try response.headers.append("content-type", "text/html");
         try response.headers.append("connection", "close");

@@ -1,36 +1,34 @@
 const std = @import("std");
+const Db = @import("../db.zig");
 
 const List = @This();
 
 allocator: std.mem.Allocator,
-data: std.ArrayList(u8),
 template: []const u8 = @embedFile("../templates/list.html"),
+data: *Db,
 
 pub fn view(self: *List) ![]const u8 {
     var html: []u8 = "";
-    for (self.data.items) |_| {
-        html = try std.fmt.allocPrint(self.allocator, "{s}\n{s}", .{ html, self.template });
+    const tasks = try self.data.get_all_tasks();
+    for (tasks) |t| {
+        html = try std.fmt.allocPrint(self.allocator, "{s}\n<p>{s}</p>", .{ html, t.description });
     }
     return html;
 }
 
 pub fn update(self: *List, target: []const u8) !void {
     _ = target;
-    try self.data.append(0);
+    try self.data.add_new_task("another new task!");
 }
 
-pub fn init() List {
+pub fn init(db: *Db) List {
     const allocator = std.heap.page_allocator;
     return .{
         .allocator = allocator,
-        .data = std.ArrayList(u8).init(allocator),
+        .data = db,
     };
 }
 
 pub fn deinit(self: *List) void {
     self.data.deinit();
-}
-
-pub fn reset(self: *List) void {
-    self.data.clearAndFree();
 }

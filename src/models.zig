@@ -1,3 +1,3 @@
-pub const Todo = struct {
-    contents: [128:0]u8,
+pub const Task = struct {
+    description: [1024:0]u8,
 };

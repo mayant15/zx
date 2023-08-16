@@ -11,6 +11,14 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const sqlite = b.dependency("sqlite", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    exe.addModule("sqlite", sqlite.module("sqlite"));
+    exe.linkLibrary(sqlite.artifact("sqlite"));
+
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);

@@ -3,6 +3,8 @@ const std = @import("std");
 const List = @import("./components/list.zig");
 const Root = @import("./components/root.zig");
 
+const Db = @import("./db.zig");
+
 const allocator = std.heap.page_allocator;
 
 var list = List.init();
@@ -35,6 +37,12 @@ pub fn main() !void {
     try server.listen(address);
     std.log.info("Listening on {}", .{address});
 
+    var db = try Db.init();
+    const todo = try db.get_one_todo();
+    if (todo) |t| {
+        std.log.info("TODO: {s}", .{t.contents});
+    }
+
     while (server.accept(.{ .allocator = allocator })) |res| {
         var response = res;
         defer response.deinit();
@@ -57,4 +65,5 @@ pub fn main() !void {
     }
 
     list.deinit();
+    db.deinit();
 }

@@ -16,9 +16,13 @@ pub fn view(self: *List) ![]const u8 {
     return html;
 }
 
-pub fn update(self: *List, target: []const u8) !void {
+pub fn update(self: *List, target: []const u8, body: []const u8) !void {
     _ = target;
-    try self.data.add_new_task("another new task!");
+
+    var parsed = try std.json.parseFromSlice(struct { description: []const u8 }, self.allocator, body, .{});
+    defer parsed.deinit();
+
+    try self.data.add_new_task(parsed.value.description);
 }
 
 pub fn init(db: *Db) List {

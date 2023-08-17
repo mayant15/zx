@@ -3,14 +3,22 @@
   <head>
     <title>HTMX</title>
   </head>
+
   <script src="https://unpkg.com/htmx.org@1.9.4"
   integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV" crossorigin="anonymous"></script>
+
+  <script src="https://unpkg.com/htmx.org@1.9.4/dist/ext/json-enc.js"
+  integrity="sha384-nRnAvEUI7N/XvvowiMiq7oEI04gOXMCqD3Bidvedw+YNbj7zTQACPlRI3Jt3vYM4" crossorigin="anonymous"></script>
+
   <body>
     <h1> HTMX? More like Deez Nuts</h1>
-    <button hx-post="/clicked" hx-swap="innerHTML" hx-target="#list">
-      Another one
+
+    <input type="text" id="description" name="description" required />
+    <button hx-post="/add" hx-swap="innerHTML" hx-target="#list" hx-include="#description" hx-ext='json-enc'>
+      Add Task
     </button>
 
     <div id="list"></div>
+
   </body>
 </html>

@@ -41,7 +41,7 @@ pub fn get_all_tasks(self: *Db) ![]Task {
     return stmt.all(Task, self.allocator, .{}, .{});
 }
 
-pub fn add_new_task(self: *Db, description: [:0]const u8) !void {
+pub fn add_new_task(self: *Db, description: []const u8) !void {
     const query =
         \\INSERT INTO tasks(description) VALUES($description)
     ;

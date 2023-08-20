@@ -24,15 +24,3 @@ pub fn update(self: *List, target: []const u8, body: []const u8) !void {
 
     try self.data.add_new_task(parsed.value.description);
 }
-
-pub fn init(db: *Db) List {
-    const allocator = std.heap.page_allocator;
-    return .{
-        .allocator = allocator,
-        .data = db,
-    };
-}
-
-pub fn deinit(self: *List) void {
-    self.data.deinit();
-}

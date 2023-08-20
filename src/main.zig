@@ -34,7 +34,10 @@ pub fn main() !void {
     std.log.info("Listening on {}", .{address});
 
     var db = try Db.init();
-    var list = List.init(&db);
+    var list = List{
+        .allocator = allocator,
+        .data = &db,
+    };
 
     while (server.accept(.{ .allocator = allocator })) |res| {
         var response = res;
@@ -57,6 +60,5 @@ pub fn main() !void {
         std.log.err("{}", .{err});
     }
 
-    list.deinit();
     db.deinit();
 }
